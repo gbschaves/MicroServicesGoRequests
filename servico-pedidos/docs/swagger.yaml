@@ -1,0 +1,64 @@
+basePath: /api/pedidos
+definitions:
+  main.NovoPedidoRequest:
+    properties:
+      produto_id:
+        type: integer
+      quantidade:
+        type: integer
+      usuario_id:
+        type: integer
+    type: object
+  main.Pedido:
+    properties:
+      id:
+        type: integer
+      produto_id:
+        type: integer
+      quantidade:
+        type: integer
+      usuario_id:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Este é o microserviço de pedidos.
+  title: API de Pedidos (Microserviço)
+  version: "1.0"
+paths:
+  /pedidos:
+    post:
+      consumes:
+      - application/json
+      description: Cria um novo pedido validando usuário e produto
+      parameters:
+      - description: Informações do Pedido
+        in: body
+        name: pedido
+        required: true
+        schema:
+          $ref: '#/definitions/main.NovoPedidoRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.Pedido'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Cria um novo pedido
+      tags:
+      - pedidos
+swagger: "2.0"

@@ -1,0 +1,78 @@
+basePath: /api/produtos
+definitions:
+  main.Produto:
+    properties:
+      id:
+        type: integer
+      nome:
+        type: string
+      preco:
+        type: number
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Este é o microserviço de produtos.
+  title: API de Produtos (Microserviço)
+  version: "1.0"
+paths:
+  /produtos:
+    post:
+      consumes:
+      - application/json
+      description: Cria um produto com nome e preço
+      parameters:
+      - description: Informações do Produto
+        in: body
+        name: produto
+        required: true
+        schema:
+          $ref: '#/definitions/main.Produto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.Produto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Cria um novo produto
+      tags:
+      - produtos
+  /produtos/{id}:
+    get:
+      description: Retorna os dados de um produto específico
+      parameters:
+      - description: ID do Produto
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Produto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Busca um produto por ID
+      tags:
+      - produtos
+swagger: "2.0"

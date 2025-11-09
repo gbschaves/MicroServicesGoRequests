@@ -1,0 +1,98 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Este é o microserviço de pedidos.",
+        "title": "API de Pedidos (Microserviço)",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/pedidos",
+    "paths": {
+        "/pedidos": {
+            "post": {
+                "description": "Cria um novo pedido validando usuário e produto",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pedidos"
+                ],
+                "summary": "Cria um novo pedido",
+                "parameters": [
+                    {
+                        "description": "Informações do Pedido",
+                        "name": "pedido",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.NovoPedidoRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/main.Pedido"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "main.NovoPedidoRequest": {
+            "type": "object",
+            "properties": {
+                "produto_id": {
+                    "type": "integer"
+                },
+                "quantidade": {
+                    "type": "integer"
+                },
+                "usuario_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "main.Pedido": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "produto_id": {
+                    "type": "integer"
+                },
+                "quantidade": {
+                    "type": "integer"
+                },
+                "usuario_id": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,78 @@
+basePath: /api/usuarios
+definitions:
+  main.Usuario:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      nome:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Este é o microserviço de usuários.
+  title: API de Usuários (Microserviço)
+  version: "1.0"
+paths:
+  /usuarios:
+    post:
+      consumes:
+      - application/json
+      description: Cria um usuário com nome e email
+      parameters:
+      - description: Informações do Usuário
+        in: body
+        name: usuario
+        required: true
+        schema:
+          $ref: '#/definitions/main.Usuario'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.Usuario'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Cria um novo usuário
+      tags:
+      - usuarios
+  /usuarios/{id}:
+    get:
+      description: Retorna os dados de um usuário específico
+      parameters:
+      - description: ID do Usuário
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Usuario'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Busca um usuário por ID
+      tags:
+      - usuarios
+swagger: "2.0"
