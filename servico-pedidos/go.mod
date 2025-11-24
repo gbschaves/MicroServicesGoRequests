@@ -1,6 +1,6 @@
 module servico-pedidos
 
-go 1.25.4
+go 1.22
 
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751

@@ -1,78 +1,106 @@
 <!DOCTYPE html>
-<html class="dark" lang="pt-BR"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Cadastrar Produto</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-<script>
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "primary": "#137fec",
-            "background-light": "#f6f7f8",
-            "background-dark": "#101922",
-          },
-          fontFamily: {
-            "display": ["Manrope", "sans-serif"]
-          },
-          borderRadius: {
-            "DEFAULT": "0.25rem",
-            "lg": "0.5rem",
-            "xl": "0.75rem",
-            "full": "9999px"
-          },
-        },
-      },
-    }
-  </script>
-<style>
-    .material-symbols-outlined {
-      font-variation-settings: 'FILL' 0,
-      'wght' 400,
-      'GRAD' 0,
-      'opsz' 24
-    }
-  </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-  </head>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Cadastrar Produto</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24
+        }
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
 <body class="bg-background-light dark:bg-background-dark font-display">
 <div class="relative flex h-screen w-full flex-col">
-<header class="flex shrink-0 items-center bg-background-light dark:bg-background-dark p-4 pb-2">
-<button class="text-gray-900 dark:text-white flex size-12 items-center justify-center">
-<span class="material-symbols-outlined text-2xl">arrow_back</span>
-</button>
-<h1 class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">Cadastrar Produto</h1>
-</header>
-<main class="flex-1 overflow-y-auto px-4 py-3">
-<div class="flex flex-col gap-6">
-<label class="flex flex-col">
-<p class="text-gray-800 dark:text-white text-base font-medium leading-normal pb-2">Nome do Produto</p>
-<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border-gray-300 dark:border-gray-700 bg-white dark:bg-[#233648] h-14 placeholder:text-gray-400 dark:placeholder:text-[#92adc9] p-4 text-base font-normal leading-normal" placeholder="Digite o nome do produto" value=""/>
-</label>
-<label class="flex flex-col">
-<p class="text-gray-800 dark:text-white text-base font-medium leading-normal pb-2">Preço</p>
-<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border-gray-300 dark:border-gray-700 bg-white dark:bg-[#233648] h-14 placeholder:text-gray-400 dark:placeholder:text-[#92adc9] p-4 text-base font-normal leading-normal" inputmode="decimal" placeholder="R$ 0,00" type="text" value=""/>
-</label>
-</div>
-</main>
-<footer class="p-4 bg-background-light dark:bg-background-dark">
-<button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background-dark focus:ring-primary">
-<span class="truncate">Adicionar Produto</span>
-</button>
-</footer>
+    <header class="flex shrink-0 items-center bg-background-light dark:bg-background-dark p-4 pb-2">
+        <button onclick="history.back()" class="text-gray-900 dark:text-white flex size-12 items-center justify-center cursor-pointer">
+            <span class="material-symbols-outlined text-2xl">arrow_back</span>
+        </button>
+        <h1 class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">Cadastrar Produto</h1>
+    </header>
+    <main class="flex-1 overflow-y-auto px-4 py-3">
+        <div class="flex flex-col gap-6">
+            <label class="flex flex-col">
+                <p class="text-gray-800 dark:text-white text-base font-medium leading-normal pb-2">Nome do Produto</p>
+                <input id="nome" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border-gray-300 dark:border-gray-700 bg-white dark:bg-[#233648] h-14 placeholder:text-gray-400 dark:placeholder:text-[#92adc9] p-4 text-base font-normal leading-normal" placeholder="Digite o nome do produto" value=""/>
+            </label>
+            <label class="flex flex-col">
+                <p class="text-gray-800 dark:text-white text-base font-medium leading-normal pb-2">Preço</p>
+                <input id="preco" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border-gray-300 dark:border-gray-700 bg-white dark:bg-[#233648] h-14 placeholder:text-gray-400 dark:placeholder:text-[#92adc9] p-4 text-base font-normal leading-normal" inputmode="decimal" placeholder="Ex: 50.00" type="text" value=""/>
+            </label>
+        </div>
+    </main>
+    <footer class="p-4 bg-background-light dark:bg-background-dark">
+        <button onclick="criarProduto()" class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background-dark focus:ring-primary">
+            <span class="truncate">Adicionar Produto</span>
+        </button>
+    </footer>
 </div>
 
-</body></html>
+<script>
+    async function criarProduto() {
+        const nome = document.getElementById('nome').value;
+        let precoStr = document.getElementById('preco').value;
+
+        // Troca virgula por ponto se o usuario digitar errado
+        precoStr = precoStr.replace(',', '.');
+        const preco = parseFloat(precoStr);
+
+        if (!nome || isNaN(preco)) return alert("Preencha o nome e um preço válido");
+
+        try {
+            const response = await fetch('http://localhost:8080/api/produtos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome, preco })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                alert(`Produto criado! ID: ${data.id}`);
+
+                // Salva o ID para usar na tela de Pedido
+                localStorage.setItem('ultimoProdutoID', data.id);
+
+                // Vai para a tela de pedido
+                window.location.href = 'pedido.html';
+            } else {
+                alert("Erro ao criar produto");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Erro de conexão com API");
+        }
+    }
+</script>
+</body>
+</html>
