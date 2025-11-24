@@ -1,0 +1,138 @@
+version: '3.8'
+
+services:
+  # --- BANCOS DE DADOS ---
+  db-usuarios:
+    image: postgres:15-alpine
+    container_name: db-usuarios
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: usuarios_db
+    volumes:
+      - data-usuarios:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  db-produtos:
+    image: postgres:15-alpine
+    container_name: db-produtos
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: produtos_db
+    volumes:
+      - data-produtos:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  db-pedidos:
+    image: postgres:15-alpine
+    container_name: db-pedidos
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: pedidos_db
+    volumes:
+      - data-pedidos:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  # --- MICROSSERVIÇOS ---
+  servico-usuarios:
+    build: ./servico-usuarios
+    container_name: servico-usuarios
+    environment:
+      - DB_HOST=db-usuarios
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=usuarios_db
+      - DB_PORT=5432
+      - PORT=8081
+    ports:
+      - "8081:8081"
+    depends_on:
+      - db-usuarios
+    networks:
+      - app-network
+
+  servico-produtos:
+    build: ./servico-produtos
+    container_name: servico-produtos
+    environment:
+      - DB_HOST=db-produtos
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=produtos_db
+      - DB_PORT=5432
+      - PORT=8082
+    ports:
+      - "8082:8082"
+    depends_on:
+      - db-produtos
+    networks:
+      - app-network
+
+  servico-pedidos:
+    build: ./servico-pedidos
+    container_name: servico-pedidos
+    environment:
+      - DB_HOST=db-pedidos
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=pedidos_db
+      - DB_PORT=5432
+      - PORT=8083
+      # Microsserviços precisam se comunicar? Defina as URLs internas aqui
+      - USER_SERVICE_URL=http://servico-usuarios:8081
+      - PRODUCT_SERVICE_URL=http://servico-produtos:8082
+    ports:
+      - "8083:8083"
+    depends_on:
+      - db-pedidos
+    networks:
+      - app-network
+
+  # --- API GATEWAY ---
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    environment:
+      - PORT=8080
+      # O Gateway usa os nomes dos containers para achar os serviços
+      - USER_SERVICE_URL=http://servico-usuarios:8081
+      - PRODUCT_SERVICE_URL=http://servico-produtos:8082
+      - ORDER_SERVICE_URL=http://servico-pedidos:8083
+    ports:
+      - "8080:8080" # Porta que será exposta no CasaOS
+    depends_on:
+      - servico-usuarios
+      - servico-produtos
+      - servico-pedidos
+    networks:
+      - app-network
+
+  # --- FRONTEND ---
+  frontend:
+    build:
+      context: ./my-project
+      args:
+        # ATENÇÃO: Aqui deve ser o IP do seu CasaOS na rede local, não "localhost"
+        # O Frontend roda no navegador do usuário, não dentro do Docker.
+        - VITE_API_URL=http://SEU_IP_CASAOS:8080
+    container_name: frontend-app
+    ports:
+      - "3000:80" # O Frontend estará disponível na porta 3000 do CasaOS
+    depends_on:
+      - api-gateway
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  data-usuarios:
+  data-produtos:
+  data-pedidos:
