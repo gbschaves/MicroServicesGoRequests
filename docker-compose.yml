@@ -70,7 +70,6 @@ services:
         condition: service_healthy
     environment:
       - SERVER_PORT=:8081
-      # String de conexão pronta para o código Go (Postgres)
       - DATABASE_URL=postgres://user_usr:password_usr@db-usuarios:5432/usuarios_db?sslmode=disable
     networks:
       - app-network
@@ -96,7 +95,6 @@ services:
     environment:
       - SERVER_PORT=:8083
       - DATABASE_URL=postgres://user_ped:password_ped@db-pedidos:5432/pedidos_db?sslmode=disable
-      # Comunicação entre serviços
       - URL_USUARIOS=http://servico-usuarios:8081
       - URL_PRODUTOS=http://servico-produtos:8082
     networks:
@@ -118,7 +116,7 @@ services:
       - PRODUCT_SERVICE_URL=http://servico-produtos:8082
       - ORDER_SERVICE_URL=http://servico-pedidos:8083
     ports:
-      - "30000:8080" # <--- ALTERADO PARA 30000 (porta remota)
+      - "9090:8080" # <--- ALTERADO PARA 9090
     networks:
       - app-network
 
@@ -129,7 +127,7 @@ services:
     build: ./front
     container_name: frontend-app
     ports:
-      - "3000:80" # Acesse no navegador via http://localhost:3000/usuario.html
+      - "3000:80"
     networks:
       - app-network
 

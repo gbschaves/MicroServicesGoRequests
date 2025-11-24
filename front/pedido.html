@@ -105,8 +105,8 @@
         if (!usuario_id || !produto_id || !quantidade) return alert("Preencha todos os campos");
 
         try {
-            // PORTA ALTERADA PARA 30000
-            const response = await fetch('http://localhost:30000/api/pedidos', {
+            // PORTA ALTERADA PARA 9090
+            const response = await fetch('http://localhost:9090/api/pedidos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ usuario_id, produto_id, quantidade })
@@ -121,7 +121,7 @@
             }
         } catch (error) {
             console.error(error);
-            alert("Erro de conexão com API (Porta 30000)");
+            alert("Erro de conexão com API (Porta 9090)");
         }
     }
 </script>

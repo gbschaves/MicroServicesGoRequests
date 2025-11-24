@@ -76,8 +76,8 @@
         if (!nome || !email) return alert("Preencha todos os campos");
 
         try {
-            // PORTA ALTERADA PARA 30000
-            const response = await fetch('http://localhost:30000/api/usuarios', {
+            // PORTA ALTERADA PARA 9090
+            const response = await fetch('http://localhost:9090/api/usuarios', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nome, email })
@@ -93,7 +93,7 @@
             }
         } catch (error) {
             console.error(error);
-            alert("Erro na comunicação com a API (Porta 30000)");
+            alert("Erro na comunicação com a API (Porta 9090)");
         }
     }
 </script>

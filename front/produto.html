@@ -77,8 +77,8 @@
         if (!nome || isNaN(preco)) return alert("Preencha o nome e um preço válido");
 
         try {
-            // PORTA ALTERADA PARA 30000
-            const response = await fetch('http://localhost:30000/api/produtos', {
+            // PORTA ALTERADA PARA 9090
+            const response = await fetch('http://localhost:9090/api/produtos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nome, preco })
@@ -94,7 +94,7 @@
             }
         } catch (error) {
             console.error(error);
-            alert("Erro de conexão com API (Porta 30000)");
+            alert("Erro de conexão com API (Porta 9090)");
         }
     }
 </script>
