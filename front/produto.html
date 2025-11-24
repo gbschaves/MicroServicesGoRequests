@@ -78,7 +78,7 @@
 
         try {
             // PORTA ALTERADA PARA 9090
-            const response = await fetch('http://localhost:9090/api/produtos', {
+            const response = await fetch('http://100.85.99.51:9090/api/produtos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nome, preco })
