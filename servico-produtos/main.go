@@ -1,93 +1,90 @@
 package main
 
 import (
-	"fmt"
+	"database/sql"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 
-	_ "servico-produtos/docs" // <-- IMPORTANTE
+	_ "servico-produtos/docs"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// 1. Nosso Modelo de Dados
 type Produto struct {
 	ID    int     `json:"id"`
 	Nome  string  `json:"nome"`
 	Preco float64 `json:"preco"`
 }
 
-// 2. "Banco de Dados"
-var produtos []Produto
-var proximoID = 1
+var db *sql.DB
 
-// 3. Handlers (com anotações Swagger)
+func initDB() {
+	var err error
+	dbURL := os.Getenv("DATABASE_URL")
+	db, err = sql.Open("postgres", dbURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err = db.Ping(); err != nil {
+		log.Fatal(err)
+	}
+
+	query := `CREATE TABLE IF NOT EXISTS produtos (
+		id SERIAL PRIMARY KEY,
+		nome TEXT NOT NULL,
+		preco NUMERIC(10, 2) NOT NULL
+	)`
+	if _, err = db.Exec(query); err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Banco de Produtos OK!")
+}
 
 // @Summary      Cria um novo produto
-// @Description  Cria um produto com nome e preço
-// @Tags         produtos
-// @Accept       json
-// @Produce      json
-// @Param        produto  body      Produto  true  "Informações do Produto"
-// @Success      201      {object}  Produto
-// @Failure      400      {object}  map[string]string
 // @Router       /produtos [post]
 func criarProduto(c *gin.Context) {
-	var novoProduto Produto
-	if err := c.BindJSON(&novoProduto); err != nil {
+	var p Produto
+	if err := c.BindJSON(&p); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	novoProduto.ID = proximoID
-	proximoID++
-	produtos = append(produtos, novoProduto)
-	c.JSON(http.StatusCreated, novoProduto)
+
+	query := `INSERT INTO produtos (nome, preco) VALUES ($1, $2) RETURNING id`
+	if err := db.QueryRow(query, p.Nome, p.Preco).Scan(&p.ID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, p)
 }
 
 // @Summary      Busca um produto por ID
-// @Description  Retorna os dados de um produto específico
-// @Tags         produtos
-// @Produce      json
-// @Param        id   path      int  true  "ID do Produto"
-// @Success      200  {object}  Produto
-// @Failure      400      {object}  map[string]string
-// @Failure      404      {object}  map[string]string
 // @Router       /produtos/{id} [get]
 func buscarProdutoPorID(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
+	id, _ := strconv.Atoi(c.Param("id"))
+	var p Produto
+
+	query := `SELECT id, nome, preco FROM produtos WHERE id = $1`
+	err := db.QueryRow(query, id).Scan(&p.ID, &p.Nome, &p.Preco)
+
+	if err == sql.ErrNoRows {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Produto não encontrado"})
 		return
 	}
-	for _, p := range produtos {
-		if p.ID == id {
-			c.JSON(http.StatusOK, p)
-			return
-		}
-	}
-	c.JSON(http.StatusNotFound, gin.H{"error": "Produto não encontrado"})
+	c.JSON(http.StatusOK, p)
 }
 
-// 4. Função Principal
-// @title        API de Produtos (Microserviço)
-// @version      1.0
-// @description  Este é o microserviço de produtos.
-// @host         localhost:8080
-// @BasePath     /api/produtos
 func main() {
-	router := gin.Default()
+	initDB()
+	defer db.Close()
 
+	router := gin.Default()
 	router.POST("/produtos", criarProduto)
 	router.GET("/produtos/:id", buscarProdutoPorID)
-
-	// Rota do Swagger
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	porta := ":8082"
-	fmt.Printf("Serviço de Produtos (com Swagger) rodando na porta %s\n", porta)
-	fmt.Printf("Acesse a documentação em http://localhost:8082/swagger/index.html\n")
-	router.Run(porta)
+	router.Run(":8082")
 }

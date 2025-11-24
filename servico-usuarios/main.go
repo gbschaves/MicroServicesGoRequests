@@ -1,93 +1,105 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 
-	_ "servico-usuarios/docs" // <-- IMPORTANTE (para o doc.json)
+	_ "servico-usuarios/docs"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// 1. Nosso Modelo de Dados
 type Usuario struct {
 	ID    int    `json:"id"`
 	Nome  string `json:"nome"`
 	Email string `json:"email"`
 }
 
-// 2. Nosso "Banco de Dados"
-var usuarios []Usuario
-var proximoID = 1
+var db *sql.DB
 
-// 3. Handlers (com anotações Swagger)
+func initDB() {
+	var err error
+	dbURL := os.Getenv("DATABASE_URL")
+	db, err = sql.Open("postgres", dbURL)
+	if err != nil {
+		log.Fatal("Erro ao conectar:", err)
+	}
+
+	if err = db.Ping(); err != nil {
+		log.Fatal("Banco não responde:", err)
+	}
+
+	// Cria a tabela se não existir
+	query := `CREATE TABLE IF NOT EXISTS usuarios (
+		id SERIAL PRIMARY KEY,
+		nome TEXT NOT NULL,
+		email TEXT NOT NULL
+	)`
+	_, err = db.Exec(query)
+	if err != nil {
+		log.Fatal("Erro ao criar tabela:", err)
+	}
+	log.Println("Banco de Dados de Usuários conectado e configurado!")
+}
 
 // @Summary      Cria um novo usuário
-// @Description  Cria um usuário com nome e email
-// @Tags         usuarios
-// @Accept       json
-// @Produce      json
-// @Param        usuario  body      Usuario  true  "Informações do Usuário"
-// @Success      201      {object}  Usuario
-// @Failure      400      {object}  map[string]string
 // @Router       /usuarios [post]
 func criarUsuario(c *gin.Context) {
-	var novoUsuario Usuario
-	if err := c.BindJSON(&novoUsuario); err != nil {
+	var u Usuario
+	if err := c.BindJSON(&u); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	novoUsuario.ID = proximoID
-	proximoID++
-	usuarios = append(usuarios, novoUsuario)
-	c.JSON(http.StatusCreated, novoUsuario)
+
+	// INSERE NO BANCO DE DADOS REAL
+	query := `INSERT INTO usuarios (nome, email) VALUES ($1, $2) RETURNING id`
+	err := db.QueryRow(query, u.Nome, u.Email).Scan(&u.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao salvar no banco"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, u)
 }
 
 // @Summary      Busca um usuário por ID
-// @Description  Retorna os dados de um usuário específico
-// @Tags         usuarios
-// @Produce      json
-// @Param        id   path      int  true  "ID do Usuário"
-// @Success      200  {object}  Usuario
-// @Failure      400  {object}  map[string]string
-// @Failure      404  {object}  map[string]string
 // @Router       /usuarios/{id} [get]
 func buscarUsuarioPorID(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
+	id, _ := strconv.Atoi(idStr)
+
+	var u Usuario
+	// BUSCA DO BANCO DE DADOS REAL
+	query := `SELECT id, nome, email FROM usuarios WHERE id = $1`
+	row := db.QueryRow(query, id)
+
+	err := row.Scan(&u.ID, &u.Nome, &u.Email)
+	if err == sql.ErrNoRows {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Usuário não encontrado"})
+		return
+	} else if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	for _, u := range usuarios {
-		if u.ID == id {
-			c.JSON(http.StatusOK, u)
-			return
-		}
-	}
-	c.JSON(http.StatusNotFound, gin.H{"error": "Usuário não encontrado"})
+
+	c.JSON(http.StatusOK, u)
 }
 
-// 4. Função Principal
-// @title        API de Usuários (Microserviço)
-// @version      1.0
-// @description  Este é o microserviço de usuários.
-// @host         localhost:8080
-// @BasePath     /api/usuarios
 func main() {
-	router := gin.Default()
+	initDB()
+	defer db.Close()
 
+	router := gin.Default()
 	router.POST("/usuarios", criarUsuario)
 	router.GET("/usuarios/:id", buscarUsuarioPorID)
-
-	// Rota do Swagger
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	porta := ":8081"
-	fmt.Printf("Serviço de Usuários (com Swagger) rodando na porta %s\n", porta)
-	fmt.Printf("Acesse a documentação em http://localhost:8081/swagger/index.html\n")
-	router.Run(porta)
+	router.Run(":8081")
 }
