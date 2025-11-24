@@ -76,8 +76,8 @@
         if (!nome || !email) return alert("Preencha todos os campos");
 
         try {
-            // Chama o Gateway na porta 8080
-            const response = await fetch('http://localhost:8080/api/usuarios', {
+            // PORTA ALTERADA PARA 30000
+            const response = await fetch('http://localhost:30000/api/usuarios', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nome, email })
@@ -86,18 +86,14 @@
             if (response.ok) {
                 const data = await response.json();
                 alert(`Usuário criado com sucesso! ID: ${data.id}`);
-
-                // Salva o ID para usar na tela de Pedido automaticamente
                 localStorage.setItem('ultimoUsuarioID', data.id);
-
-                // Redireciona para o cadastro de produto
                 window.location.href = 'produto.html';
             } else {
                 alert("Erro ao criar usuário");
             }
         } catch (error) {
             console.error(error);
-            alert("Erro na comunicação com a API (Verifique se o Gateway está rodando na porta 8080)");
+            alert("Erro na comunicação com a API (Porta 30000)");
         }
     }
 </script>

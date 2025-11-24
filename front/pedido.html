@@ -83,4 +83,47 @@
         </main>
         <footer class="sticky bottom-0 p-4 bg-background-light dark:bg-background-dark">
             <button onclick="criarPedido()" class="flex min-w-[84px] w-full max-w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background-dark focus:ring-primary transition-colors">
-                <span
+                <span class="truncate">Criar Pedido</span>
+            </button>
+        </footer>
+    </div>
+</div>
+
+<script>
+    window.onload = function() {
+        const uid = localStorage.getItem('ultimoUsuarioID');
+        const pid = localStorage.getItem('ultimoProdutoID');
+        if(uid) document.getElementById('usuario_id').value = uid;
+        if(pid) document.getElementById('produto_id').value = pid;
+    }
+
+    async function criarPedido() {
+        const usuario_id = parseInt(document.getElementById('usuario_id').value);
+        const produto_id = parseInt(document.getElementById('produto_id').value);
+        const quantidade = parseInt(document.getElementById('quantidade').value);
+
+        if (!usuario_id || !produto_id || !quantidade) return alert("Preencha todos os campos");
+
+        try {
+            // PORTA ALTERADA PARA 30000
+            const response = await fetch('http://localhost:30000/api/pedidos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario_id, produto_id, quantidade })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                alert(`Sucesso! Pedido ID: ${data.id} criado.`);
+            } else {
+                const err = await response.json();
+                alert("Erro: " + (err.error || "Falha ao criar pedido"));
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Erro de conexão com API (Porta 30000)");
+        }
+    }
+</script>
+</body>
+</html>

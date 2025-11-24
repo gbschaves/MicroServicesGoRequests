@@ -118,7 +118,7 @@ services:
       - PRODUCT_SERVICE_URL=http://servico-produtos:8082
       - ORDER_SERVICE_URL=http://servico-pedidos:8083
     ports:
-      - "8090:8080" # <--- ALTERADO DE 8080 PARA 8090 (Porta Externa:Porta Interna)
+      - "30000:8080" # <--- ALTERADO PARA 30000 (porta remota)
     networks:
       - app-network
 
@@ -129,7 +129,7 @@ services:
     build: ./front
     container_name: frontend-app
     ports:
-      - "3000:80" # Acesse no navegador via http://IP-DO-CASAOS:3000/usuario.html
+      - "3000:80" # Acesse no navegador via http://localhost:3000/usuario.html
     networks:
       - app-network
 

@@ -71,14 +71,14 @@
         const nome = document.getElementById('nome').value;
         let precoStr = document.getElementById('preco').value;
 
-        // Troca virgula por ponto se o usuario digitar errado
         precoStr = precoStr.replace(',', '.');
         const preco = parseFloat(precoStr);
 
         if (!nome || isNaN(preco)) return alert("Preencha o nome e um preço válido");
 
         try {
-            const response = await fetch('http://localhost:8080/api/produtos', {
+            // PORTA ALTERADA PARA 30000
+            const response = await fetch('http://localhost:30000/api/produtos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nome, preco })
@@ -87,18 +87,14 @@
             if (response.ok) {
                 const data = await response.json();
                 alert(`Produto criado! ID: ${data.id}`);
-
-                // Salva o ID para usar na tela de Pedido
                 localStorage.setItem('ultimoProdutoID', data.id);
-
-                // Vai para a tela de pedido
                 window.location.href = 'pedido.html';
             } else {
                 alert("Erro ao criar produto");
             }
         } catch (error) {
             console.error(error);
-            alert("Erro de conexão com API");
+            alert("Erro de conexão com API (Porta 30000)");
         }
     }
 </script>
