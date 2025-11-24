@@ -1,5 +1,5 @@
-# Etapa de Build - MUDAMOS DE 1.21 PARA 1.22
-FROM golang:1.22-alpine AS builder
+# Etapa de Build
+FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
 
@@ -10,18 +10,19 @@ RUN go mod download
 # Copia o código fonte
 COPY . .
 
-# Compila a aplicação
+# Compila a aplicação (garante um binário estático)
 RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
-# Etapa Final
+# Etapa Final (Imagem leve)
 FROM alpine:latest
 
 WORKDIR /app
 
+# Copia o binário da etapa de build
 COPY --from=builder /app/main .
-# A linha abaixo é opcional, só se tiver a pasta docs
-# COPY --from=builder /app/docs ./docs
+# Copia a pasta docs para o Swagger funcionar
+COPY --from=builder /app/docs ./docs
 
-EXPOSE 8080 8081 8082 8083
+EXPOSE 8080
 
 CMD ["./main"]

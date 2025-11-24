@@ -1,6 +1,6 @@
 module api-gateway
 
-go 1.22
+go 1.23.0
 
 require (
 	github.com/gin-gonic/gin v1.11.0
