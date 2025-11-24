@@ -3,6 +3,9 @@ FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
 
+# Instala git
+RUN apk add --no-cache git
+
 # Copia dependências
 COPY go.mod go.sum ./
 RUN go mod download
@@ -10,7 +13,11 @@ RUN go mod download
 # Copia o código fonte
 COPY . .
 
-# Compila a aplicação (garante um binário estático)
+# --- CORREÇÃO: Atualiza dependências ---
+RUN go mod tidy
+# ---------------------------------------
+
+# Compila a aplicação
 RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
 # Etapa Final (Imagem leve)
@@ -20,7 +27,7 @@ WORKDIR /app
 
 # Copia o binário da etapa de build
 COPY --from=builder /app/main .
-# Copia a pasta docs para o Swagger funcionar
+# Copia a pasta docs para o Swagger
 COPY --from=builder /app/docs ./docs
 
 EXPOSE 8080
