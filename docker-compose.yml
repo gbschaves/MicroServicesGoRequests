@@ -118,7 +118,7 @@ services:
       - PRODUCT_SERVICE_URL=http://servico-produtos:8082
       - ORDER_SERVICE_URL=http://servico-pedidos:8083
     ports:
-      - "8080:8080" # Apenas o Gateway e o Front são expostos para fora
+      - "8090:8080" # <--- ALTERADO DE 8080 PARA 8090 (Porta Externa:Porta Interna)
     networks:
       - app-network
 
