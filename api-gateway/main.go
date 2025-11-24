@@ -34,6 +34,8 @@ func proxyRequest(target string) gin.HandlerFunc {
 			req.URL.Scheme = remote.Scheme
 			req.URL.Host = remote.Host
 
+			// Remove o prefixo /api para mandar para o microserviço
+			// Ex: Gateway recebe /api/usuarios -> Microserviço recebe /usuarios
 			originalPath := c.Request.URL.Path
 			req.URL.Path = strings.TrimPrefix(originalPath, "/api")
 		}
@@ -74,8 +76,7 @@ func main() {
 
 	router := gin.Default()
 
-	// --- MIDDLEWARE CORS (ADICIONADO) ---
-	// Permite que o Front (porta 3000 ou qualquer outra) acesse a API
+	// --- CORS Middleware ---
 	router.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -88,9 +89,9 @@ func main() {
 		}
 		c.Next()
 	})
-	// -------------------------------------
 
-	// Rotas do Swagger
+	// === Rotas do Swagger ===
+	// Estas rotas devem ser definidas antes ou de forma que não conflitem
 	const docsUsuariosPrefix = "/api/usuarios/docs"
 	router.GET(docsUsuariosPrefix+"/*proxyPath", proxySwaggerRequest(targetUsuarios, docsUsuariosPrefix))
 
@@ -100,14 +101,18 @@ func main() {
 	const docsPedidosPrefix = "/api/pedidos/docs"
 	router.GET(docsPedidosPrefix+"/*proxyPath", proxySwaggerRequest(targetPedidos, docsPedidosPrefix))
 
-	// Rotas da API
-	router.Any("/api/usuarios/*path", proxyRequest(targetUsuarios))
+	// === Rotas da API (Específicas) ===
+	// Removemos o router.Any com *path para evitar conflito com o Swagger
+
+	// Usuários
 	router.POST("/api/usuarios", proxyRequest(targetUsuarios))
 	router.GET("/api/usuarios/:id", proxyRequest(targetUsuarios))
 
+	// Produtos
 	router.POST("/api/produtos", proxyRequest(targetProdutos))
 	router.GET("/api/produtos/:id", proxyRequest(targetProdutos))
 
+	// Pedidos
 	router.POST("/api/pedidos", proxyRequest(targetPedidos))
 
 	porta := getEnv("SERVER_PORT", ":8080")
