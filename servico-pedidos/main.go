@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -72,7 +71,6 @@ func criarPedido(c *gin.Context) {
 	}
 
 	// 1. Validar Usuário (Comunicação via HTTP)
-	// No Docker, URL_USUARIOS será "http://servico-usuarios:8081"
 	urlBaseUsuario := getEnv("URL_USUARIOS", "http://localhost:8081")
 	respUsuario, err := http.Get(fmt.Sprintf("%s/usuarios/%d", urlBaseUsuario, req.UsuarioID))
 
