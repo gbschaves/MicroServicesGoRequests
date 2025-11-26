@@ -120,7 +120,7 @@ services:
     depends_on:
       - api-gateway
     ports:
-      - "80:80"  # Cloudflare (443) -> Roteador (80) -> Aqui (80)
+      - "3000:80"  # Cloudflare (443) -> Roteador (80) -> Aqui (80)
     networks:
       - app-network
 
