@@ -3,40 +3,21 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"log"
-	"net/http"
-	"os"
-
-	_ "servico-pedidos/docs"
-
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"log"
+	"net/http"
+	"os"
+	"servico-pedidos/docs"
 )
 
 type Pedido struct {
-	ID         int `json:"id"`
-	UsuarioID  int `json:"usuario_id"`
-	ProdutoID  int `json:"produto_id"`
-	Quantidade int `json:"quantidade"`
-}
-
-type NovoPedidoRequest struct {
-	UsuarioID  int `json:"usuario_id"`
-	ProdutoID  int `json:"produto_id"`
-	Quantidade int `json:"quantidade"`
+	ID, UsuarioID, ProdutoID, Quantidade int
 }
 
 var db *sql.DB
-
-// Helper para pegar variável de ambiente ou valor padrão
-func getEnv(key, fallback string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
-	}
-	return fallback
-}
 
 func initDB() {
 	var err error
@@ -48,24 +29,13 @@ func initDB() {
 	if err = db.Ping(); err != nil {
 		log.Fatal(err)
 	}
-
-	query := `CREATE TABLE IF NOT EXISTS pedidos (
-		id SERIAL PRIMARY KEY,
-		usuario_id INT NOT NULL,
-		produto_id INT NOT NULL,
-		quantidade INT NOT NULL
-	)`
-	if _, err = db.Exec(query); err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Banco de Pedidos OK!")
+	db.Exec(`CREATE TABLE IF NOT EXISTS pedidos (id SERIAL PRIMARY KEY, usuario_id INT, produto_id INT, quantidade INT)`)
+	log.Println("DB Pedidos OK")
 }
 
-// @Summary      Cria um novo pedido
-// @Router       /pedidos [post]
 func criarPedido(c *gin.Context) {
-	var req NovoPedidoRequest
-	if err := c.BindJSON(&req); err != nil {
+	var p Pedido
+	if err := c.BindJSON(&p); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -98,23 +68,20 @@ func criarPedido(c *gin.Context) {
 	}
 
 	query := `INSERT INTO pedidos (usuario_id, produto_id, quantidade) VALUES ($1, $2, $3) RETURNING id`
-	err = db.QueryRow(query, pedido.UsuarioID, pedido.ProdutoID, pedido.Quantidade).Scan(&pedido.ID)
+	err := db.QueryRow(`INSERT INTO pedidos (usuario_id, produto_id, quantidade) VALUES ($1, $2, $3) RETURNING id`, p.UsuarioID, p.ProdutoID, p.Quantidade).Scan(&p.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao processar pedido"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao salvar"})
 		return
 	}
-
-	c.JSON(http.StatusCreated, pedido)
+	c.JSON(http.StatusCreated, p)
 }
 
 func main() {
 	initDB()
 	defer db.Close()
-
+	docs.SwaggerInfo.Host = ""
 	router := gin.Default()
 	router.POST("/pedidos", criarPedido)
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	// No Docker, usamos a porta :8083
 	router.Run(":8083")
 }

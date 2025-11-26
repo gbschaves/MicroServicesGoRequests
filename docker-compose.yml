@@ -5,9 +5,7 @@ networks:
     driver: bridge
 
 services:
-  # -------------------------
-  # 1. BANCOS DE DADOS
-  # -------------------------
+  # --- BANCOS DE DADOS ---
   postgres-usuarios:
     image: postgres:15-alpine
     container_name: db-usuarios
@@ -59,9 +57,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # -------------------------
-  # 2. MICROSERVIÇOS (GO)
-  # -------------------------
+  # --- MICROSERVIÇOS ---
   servico-usuarios:
     build: ./servico-usuarios
     container_name: servico-usuarios
@@ -100,9 +96,7 @@ services:
     networks:
       - app-network
 
-  # -------------------------
-  # 3. API GATEWAY
-  # -------------------------
+  # --- API GATEWAY (Apenas Interno) ---
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -115,19 +109,18 @@ services:
       - USER_SERVICE_URL=http://servico-usuarios:8081
       - PRODUCT_SERVICE_URL=http://servico-produtos:8082
       - ORDER_SERVICE_URL=http://servico-pedidos:8083
-    ports:
-      - "9090:8080" # <--- ALTERADO PARA 9090
+    # Nenhuma porta exposta aqui, o acesso é via frontend
     networks:
       - app-network
 
-  # -------------------------
-  # 4. FRONTEND (HTML)
-  # -------------------------
+  # --- FRONTEND (Nginx - Recebe da Cloudflare) ---
   frontend:
     build: ./front
     container_name: frontend-app
+    depends_on:
+      - api-gateway
     ports:
-      - "3000:80"
+      - "80:80"  # Cloudflare (443) -> Roteador (80) -> Aqui (80)
     networks:
       - app-network
 

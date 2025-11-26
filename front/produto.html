@@ -11,33 +11,10 @@
         tailwind.config = {
             darkMode: "class",
             theme: {
-                extend: {
-                    colors: {
-                        "primary": "#137fec",
-                        "background-light": "#f6f7f8",
-                        "background-dark": "#101922",
-                    },
-                    fontFamily: {
-                        "display": ["Manrope", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                },
+                extend: { colors: { "primary": "#137fec", "background-light": "#f6f7f8", "background-dark": "#101922" } }
             },
         }
     </script>
-    <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24
-        }
-        body {
-            min-height: max(884px, 100dvh);
-        }
-    </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display">
 <div class="relative flex h-screen w-full flex-col">
@@ -45,40 +22,28 @@
         <button onclick="history.back()" class="text-gray-900 dark:text-white flex size-12 items-center justify-center cursor-pointer">
             <span class="material-symbols-outlined text-2xl">arrow_back</span>
         </button>
-        <h1 class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">Cadastrar Produto</h1>
+        <h1 class="text-gray-900 dark:text-white text-lg font-bold flex-1 text-center pr-12">Cadastrar Produto</h1>
     </header>
     <main class="flex-1 overflow-y-auto px-4 py-3">
         <div class="flex flex-col gap-6">
-            <label class="flex flex-col">
-                <p class="text-gray-800 dark:text-white text-base font-medium leading-normal pb-2">Nome do Produto</p>
-                <input id="nome" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border-gray-300 dark:border-gray-700 bg-white dark:bg-[#233648] h-14 placeholder:text-gray-400 dark:placeholder:text-[#92adc9] p-4 text-base font-normal leading-normal" placeholder="Digite o nome do produto" value=""/>
-            </label>
-            <label class="flex flex-col">
-                <p class="text-gray-800 dark:text-white text-base font-medium leading-normal pb-2">Preço</p>
-                <input id="preco" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border-gray-300 dark:border-gray-700 bg-white dark:bg-[#233648] h-14 placeholder:text-gray-400 dark:placeholder:text-[#92adc9] p-4 text-base font-normal leading-normal" inputmode="decimal" placeholder="Ex: 50.00" type="text" value=""/>
-            </label>
+            <input id="nome" class="form-input flex w-full rounded-lg bg-white dark:bg-[#233648] text-gray-900 dark:text-white p-4" placeholder="Nome do produto"/>
+            <input id="preco" class="form-input flex w-full rounded-lg bg-white dark:bg-[#233648] text-gray-900 dark:text-white p-4" placeholder="Ex: 50.00"/>
         </div>
     </main>
     <footer class="p-4 bg-background-light dark:bg-background-dark">
-        <button onclick="criarProduto()" class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background-dark focus:ring-primary">
-            <span class="truncate">Adicionar Produto</span>
-        </button>
+        <button onclick="criarProduto()" class="flex w-full cursor-pointer items-center justify-center rounded-lg h-12 bg-primary text-white font-bold hover:bg-primary/90">Adicionar Produto</button>
     </footer>
 </div>
-
 <script>
     async function criarProduto() {
         const nome = document.getElementById('nome').value;
-        let precoStr = document.getElementById('preco').value;
-
-        precoStr = precoStr.replace(',', '.');
+        let precoStr = document.getElementById('preco').value.replace(',', '.');
         const preco = parseFloat(precoStr);
 
-        if (!nome || isNaN(preco)) return alert("Preencha o nome e um preço válido");
+        if (!nome || isNaN(preco)) return alert("Preencha corretamente");
 
         try {
-            // PORTA ALTERADA PARA 9090
-            const response = await fetch('http://100.85.99.51:9090/api/produtos', {
+            const response = await fetch('/api/produtos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nome, preco })
@@ -94,7 +59,7 @@
             }
         } catch (error) {
             console.error(error);
-            alert("Erro de conexão com API (Porta 9090)");
+            alert("Erro na comunicação com a API");
         }
     }
 </script>

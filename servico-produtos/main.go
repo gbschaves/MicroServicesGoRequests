@@ -2,17 +2,15 @@ package main
 
 import (
 	"database/sql"
-	"log"
-	"net/http"
-	"os"
-	"strconv"
-
-	_ "servico-produtos/docs"
-
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"log"
+	"net/http"
+	"os"
+	"servico-produtos/docs"
+	"strconv"
 )
 
 type Produto struct {
@@ -33,46 +31,26 @@ func initDB() {
 	if err = db.Ping(); err != nil {
 		log.Fatal(err)
 	}
-
-	query := `CREATE TABLE IF NOT EXISTS produtos (
-		id SERIAL PRIMARY KEY,
-		nome TEXT NOT NULL,
-		preco NUMERIC(10, 2) NOT NULL
-	)`
-	if _, err = db.Exec(query); err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Banco de Produtos OK!")
+	db.Exec(`CREATE TABLE IF NOT EXISTS produtos (id SERIAL PRIMARY KEY, nome TEXT, preco NUMERIC(10,2))`)
+	log.Println("DB Produtos OK")
 }
 
-// @Summary      Cria um novo produto
-// @Router       /produtos [post]
 func criarProduto(c *gin.Context) {
 	var p Produto
 	if err := c.BindJSON(&p); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	query := `INSERT INTO produtos (nome, preco) VALUES ($1, $2) RETURNING id`
-	if err := db.QueryRow(query, p.Nome, p.Preco).Scan(&p.ID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+	db.QueryRow(`INSERT INTO produtos (nome, preco) VALUES ($1, $2) RETURNING id`, p.Nome, p.Preco).Scan(&p.ID)
 	c.JSON(http.StatusCreated, p)
 }
 
-// @Summary      Busca um produto por ID
-// @Router       /produtos/{id} [get]
 func buscarProdutoPorID(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var p Produto
-
-	query := `SELECT id, nome, preco FROM produtos WHERE id = $1`
-	err := db.QueryRow(query, id).Scan(&p.ID, &p.Nome, &p.Preco)
-
-	if err == sql.ErrNoRows {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Produto não encontrado"})
+	err := db.QueryRow(`SELECT id, nome, preco FROM produtos WHERE id = $1`, id).Scan(&p.ID, &p.Nome, &p.Preco)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Não encontrado"})
 		return
 	}
 	c.JSON(http.StatusOK, p)
@@ -81,7 +59,7 @@ func buscarProdutoPorID(c *gin.Context) {
 func main() {
 	initDB()
 	defer db.Close()
-
+	docs.SwaggerInfo.Host = ""
 	router := gin.Default()
 	router.POST("/produtos", criarProduto)
 	router.GET("/produtos/:id", buscarProdutoPorID)
